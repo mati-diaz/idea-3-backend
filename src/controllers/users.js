@@ -1,6 +1,6 @@
-const bcryptjs = require("bcryptjs");
-const createJWT = require("../helpers/createJWT");
-const User = require("../models/User");
+const bcryptjs = require('bcryptjs');
+const createJWT = require('../helpers/createJWT');
+const User = require('../models/User');
 
 const register = async (req, res) => {
   try {
@@ -72,14 +72,12 @@ const login = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ _id: {$ne: req.user.id} });
 
-    if (users) {
-      res.status(200).json({
-        users
-      });
+    if (users.length) {
+      res.status(200).json({ users });
     } else {
-      res.status(204);
+      res.status(204).json();
     }
   } catch (error) {
     console.log(error)
@@ -93,18 +91,15 @@ const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = User.findById(id);
+    const user = await User.findById(id);
 
     if (user) {
-      res.status(200).json({
-        user
-      });
+      res.status(200).json({ user });
     } else {
-      res.status(404).json({
-        msg: 'Usuario No Encontrado'
-      });
+      res.status(404).json({ msg: 'Usuario No Encontrado' });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       msg: "Error del servidor",
     });
@@ -114,6 +109,7 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+
     const { name, role } = req.body;
 
     await User.findByIdAndUpdate(id, { name, role });
