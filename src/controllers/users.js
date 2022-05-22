@@ -4,11 +4,11 @@ const User = require("../models/User");
 
 const register = async (req, res) => {
   try {
-    const { email, name, password, role } = req.body;
+    const { email, name, password, role = 'CLIENT' } = req.body;
 
     const existMail = await User.findOne({ email });
     if (existMail) {
-      return res.json({
+      return res.status(400).json({
         msg: "Ya existe un usuario con ese correo",
       });
     }
@@ -25,9 +25,9 @@ const register = async (req, res) => {
 
     await newUser.save();
 
-    const token = await createJWT(name, role);
+    const token = await createJWT(name, role, newUser.id);
 
-    res.json({
+    res.status(201).json({
       msg: "User created succesfully",
       token,
     });
@@ -58,9 +58,9 @@ const login = async (req, res) => {
       });
     }
 
-    const token = await createJWT(user.name, user.role);
+    const token = await createJWT(user.name, user.role, user.id);
 
-    res.json({
+    res.status(200).json({
       token,
     });
   } catch (error) {
@@ -70,7 +70,85 @@ const login = async (req, res) => {
   }
 };
 
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+
+    if (users) {
+      res.status(200).json({
+        users
+      });
+    } else {
+      res.status(204);
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      msg: "Error del servidor",
+    });
+  }
+}
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = User.findById(id);
+
+    if (user) {
+      res.status(200).json({
+        user
+      });
+    } else {
+      res.status(404).json({
+        msg: 'Usuario No Encontrado'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      msg: "Error del servidor",
+    });
+  }
+}
+
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, role } = req.body;
+
+    await User.findByIdAndUpdate(id, { name, role });
+
+    res.status(200).json({
+      msg: 'Usuario Actualizado Correctamente'
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: "Error del servidor",
+    });
+  }
+}
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await User.findByIdAndDelete(id);
+
+    res.status(200).json({
+      msg: 'Usuario Eliminado Correctamente'
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: "Error del servidor",
+    });
+  }
+}
+ 
 module.exports = {
   register,
   login,
+  getUsers,
+  getUserById,
+  updateUser,
+  deleteUser
 };

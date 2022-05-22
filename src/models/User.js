@@ -15,8 +15,14 @@ const userSchema = Schema({
   },
   role: {
     type: String,
-    required: true
+    default: 'CLIENT'
   }
+});
+
+userSchema.method('toJSON', function() {
+  const { __v, _id, password, ...object } = this.toObject();
+  object.id = _id;
+  return object;
 });
 
 const User = model('User', userSchema);
