@@ -13,5 +13,5 @@ app.use(cors());
 app.use('/api', require('./routes/index'));
 
 app.listen(port, () => {
-  console.log(`app listening on http://localhost:${port}/api/`)
+  console.log(`app listening on http://localhost:${port}/api/`);
 });

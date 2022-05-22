@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const createJWT = (name, role, id) => {
   return new Promise((resolve, reject) => {
-    const payload = { name, role, id };
+    const payload = { name, id };
 
     jwt.sign(
       payload,

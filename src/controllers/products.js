@@ -1,8 +1,22 @@
+const uploadImg = require("../helpers/imageUploads");
 const Product = require("../models/Product");
 
 const createProduct = async (req, res) => {
   try {
+    if (req.file) {
+      const image = await uploadImg(req.file);
+      req.body.image = image
+    }
+
     const product = new Product(req.body);
+
+    const existProduct = await Product.findOne({ name: req.body.name });
+
+    if (existProduct) {
+      return res.status(400).json({
+        msg: 'Ya existe un producto con ese nombre'
+      });
+    }
 
     await product.save();
 
@@ -19,7 +33,14 @@ const createProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const { category } = req.query;
-    const products = await Product.find();
+
+    let products;
+
+    if (category) {
+      products = await Product.find({ category: category.toUpperCase() });
+    } else {
+      products = await Product.find();
+    }
 
     if (products.length) {
       res.status(200).json({ products });
@@ -72,6 +93,10 @@ const deleteProduct = async (req, res) => {
     const { id } = req.params;
 
     await Product.findByIdAndDelete(id);
+
+    res.status(200).json({
+      msg: 'Producto eliminado correctamente'
+    });
   } catch (error) {
     res.status(500).json({
       msg: "Error del servidor",
