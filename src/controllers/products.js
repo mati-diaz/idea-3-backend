@@ -1,8 +1,25 @@
 const uploadImg = require("../helpers/imageUploads");
 const Product = require("../models/Product");
+const path = require("path");
+const fs = require("fs");
 
 const createProduct = async (req, res) => {
   try {
+    const existProduct = await Product.findOne({ name: req.body.name });
+
+    if (existProduct) {
+      if (req.file) {
+        const file = path.join(__dirname, `../../uploads/${req.file.filename}`);
+        fs.unlink(file, error => {
+          if (error) throw error;
+        });
+      }
+
+      return res.status(400).json({
+        msg: 'Ya existe un producto con ese nombre'
+      });
+    }
+
     if (req.file) {
       const image = await uploadImg(req.file);
       req.body.image = image
@@ -10,20 +27,13 @@ const createProduct = async (req, res) => {
 
     const product = new Product(req.body);
 
-    const existProduct = await Product.findOne({ name: req.body.name });
-
-    if (existProduct) {
-      return res.status(400).json({
-        msg: 'Ya existe un producto con ese nombre'
-      });
-    }
-
     await product.save();
 
     res.status(201).json({
       msg: 'Producto creado correctamente'
     });
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       msg: "Error del servidor",
     });
@@ -75,6 +85,11 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (req.file) {
+      const image = await uploadImg(req.file);
+      req.body.image = image
+    }
 
     await Product.findByIdAndUpdate(id, req.body);
 

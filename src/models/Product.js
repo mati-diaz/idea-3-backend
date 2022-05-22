@@ -18,7 +18,10 @@ const productSchema = Schema({
     type: String,
     required: true
   },
-  image: String
+  image: {
+    type: String,
+    default: ''
+  }
 });
 
 productSchema.method('toJSON', function() {

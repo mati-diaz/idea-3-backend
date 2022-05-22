@@ -28,7 +28,8 @@ router.get('/:id', getProductById);
 router.put('/:id', [
   validateJWT,
   isAdmin,
-  validateCategory
+  validateCategory,
+  upload.single('image'),
 ], updateProduct);
 
 router.delete('/:id', validateJWT, isAdmin, deleteProduct);
