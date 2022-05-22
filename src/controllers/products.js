@@ -73,7 +73,9 @@ const getProductById = async (req, res) => {
     if (product) {
       res.status(200).json({ product });
     } else {
-      res.status(204).json();
+      res.status(404).json({
+        msg: 'Producto no encontrado'
+      });
     }
   } catch (error) {
     res.status(500).json({
